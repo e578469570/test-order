@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xzn.mapper.TbOrderDao">
+    <resultMap id="BaseResultMap" type="com.xzn.pojo.TbOrder">
+        <id column="order_id" jdbcType="BIGINT" property="orderId"/>
+        <result column="total_pay" jdbcType="BIGINT" property="totalPay"/>
+        <result column="actual_pay" jdbcType="BIGINT" property="actualPay"/>
+        <result column="promotion_ids" jdbcType="VARCHAR" property="promotionIds"/>
+        <result column="payment_type" jdbcType="BOOLEAN" property="paymentType"/>
+        <result column="post_fee" jdbcType="BIGINT" property="postFee"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="shipping_name" jdbcType="VARCHAR" property="shippingName"/>
+        <result column="shipping_code" jdbcType="VARCHAR" property="shippingCode"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="buyer_message" jdbcType="VARCHAR" property="buyerMessage"/>
+        <result column="buyer_nick" jdbcType="VARCHAR" property="buyerNick"/>
+        <result column="buyer_rate" jdbcType="BOOLEAN" property="buyerRate"/>
+        <result column="receiver_state" jdbcType="VARCHAR" property="receiverState"/>
+        <result column="receiver_city" jdbcType="VARCHAR" property="receiverCity"/>
+        <result column="receiver_district" jdbcType="VARCHAR" property="receiverDistrict"/>
+        <result column="receiver_address" jdbcType="VARCHAR" property="receiverAddress"/>
+        <result column="receiver_mobile" jdbcType="VARCHAR" property="receiverMobile"/>
+        <result column="receiver_zip" jdbcType="VARCHAR" property="receiverZip"/>
+        <result column="receiver" jdbcType="VARCHAR" property="receiver"/>
+        <result column="invoice_type" jdbcType="INTEGER" property="invoiceType"/>
+        <result column="source_type" jdbcType="INTEGER" property="sourceType"/>
+    </resultMap>
+    <resultMap id="orderInfo" type="com.xzn.pojo.TbOrder" extends="BaseResultMap">
+        <association property="tbOrderStatus" javaType="com.xzn.pojo.TbOrderStatus" resultMap="com.xzn.mapper.TbOrderStatusDao.BaseResultMap"/>
+        <collection property="tbOrderDetailList" ofType="com.xzn.pojo.TbOrderDetail" resultMap="com.xzn.mapper.TbOrderDetailDao.BaseResultMap"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    order_id, total_pay, actual_pay, promotion_ids, payment_type, post_fee, create_time,
+    shipping_name, shipping_code, user_id, buyer_message, buyer_nick, buyer_rate, receiver_state,
+    receiver_city, receiver_district, receiver_address, receiver_mobile, receiver_zip,
+    receiver, invoice_type, source_type
+  </sql>
+    <select id="queryCount" resultType="java.lang.Integer">
+        SELECT count(tb_order.order_id)
+        FROM tb_order,tb_order_status
+        where tb_order.order_id=tb_order_status.order_id
+        and tb_order.user_id=#{userId}
+        <if test="status!=null and status!=0">
+            and tb_order_status.status=#{status}
+        </if>
+
+    </select>
+    <select id="queryOrderList" resultMap="orderInfo">
+SELECT
+	tb_order.order_id,
+	tb_order.total_pay,
+	tb_order.create_time,
+	tb_order_status.`status`,
+	tb_order_detail.title,
+	tb_order_detail.own_spec,
+	tb_order_detail.price,
+	tb_order_detail.image,
+	tb_order_detail.num
+FROM
+	(SELECT * from tb_order WHERE tb_order.user_id =#{userId} LIMIT #{start},#{pageSize}) tb_order,
+	tb_order_status,
+	tb_order_detail
+WHERE
+	tb_order.order_id = tb_order_status.order_id
+AND tb_order.order_id = tb_order_detail.order_id
+
+
+
+
+    </select>
+
+</mapper>
